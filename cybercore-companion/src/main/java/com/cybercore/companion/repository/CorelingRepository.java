@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface CorelingRepository extends JpaRepository<Coreling, Long> {
-    Optional<Coreling> findByUserId(Long userId);
+    Optional<Coreling> findByUserAccountId(Long userAccountId);
 }

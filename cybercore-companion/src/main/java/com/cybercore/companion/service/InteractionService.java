@@ -27,7 +27,7 @@ public class InteractionService {
     @KafkaListener(topics = "coreling.interactions")
     public void processInteraction(String interactionId, String payload) {
         String[] parts = payload.split("\\|");
-        Long userId = Long.parseLong(parts[0]);
+        Long userAccountId = Long.parseLong(parts[0]);
         String message = parts[1];
 
         // 1. Retrieve context using RAG
@@ -38,7 +38,7 @@ public class InteractionService {
         String response = "Simulated LLM response based on context"; 
 
         // 3. Update Coreling state
-        Coreling coreling = corelingRepository.findByUserId(userId)
+        Coreling coreling = corelingRepository.findByUserAccountId(userAccountId)
                 .orElseThrow(() -> new ResourceNotFoundException("Coreling not found"));
         
         updateCorelingState(coreling, response);

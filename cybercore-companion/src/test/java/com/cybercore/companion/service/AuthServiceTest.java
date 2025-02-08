@@ -2,7 +2,7 @@ package com.cybercore.companion.service;
 
 import com.cybercore.companion.dto.RegisterRequest;
 import com.cybercore.companion.exception.AuthException;
-import com.cybercore.companion.model.User;
+import com.cybercore.companion.model.UserAccount;
 import com.cybercore.companion.repository.UserRepository;
 import com.cybercore.companion.util.JwtUtil;
 import org.junit.jupiter.api.Test;
@@ -27,22 +27,24 @@ class AuthServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
     
+    @Mock
+    private JwtUtil jwtUtil;
+
     @InjectMocks
     private AuthService authService;
-
-    private final JwtUtil jwtUtil = new JwtUtil();
 
     @Test
     void registerUser_Success() {
         when(userRepository.existsByUsername("newuser")).thenReturn(false);
         when(passwordEncoder.encode("password")).thenReturn("hashed");
+        when(jwtUtil.generateToken("newuser")).thenReturn("token");
 
         RegisterRequest request = new RegisterRequest();
         request.setUsername("newuser");
         request.setPassword("password");
 
         assertDoesNotThrow(() -> authService.register(request));
-        verify(userRepository).save(any(User.class));
+        verify(userRepository).save(any(UserAccount.class));
     }
 
     @Test

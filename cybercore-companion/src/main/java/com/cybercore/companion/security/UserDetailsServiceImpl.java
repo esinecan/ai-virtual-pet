@@ -1,6 +1,6 @@
 package com.cybercore.companion.security;
 
-import com.cybercore.companion.model.User;
+import com.cybercore.companion.model.UserAccount;
 import com.cybercore.companion.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,14 +20,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username)
+        UserAccount userAccount = userRepository.findByUsername(username)
                 .orElseThrow(() -> 
                     new UsernameNotFoundException("User not found with username: " + username)
                 );
 
         return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getUsername())
-                .password(user.getPassword())
+                .username(userAccount.getUsername())
+                .password(userAccount.getPassword())
                 .authorities(new ArrayList<>()) // Add roles if needed
                 .build();
     }

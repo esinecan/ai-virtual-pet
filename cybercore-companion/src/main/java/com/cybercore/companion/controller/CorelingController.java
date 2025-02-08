@@ -15,17 +15,17 @@ public class CorelingController {
 
     private final CorelingService corelingService;
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<CorelingStateDto> getCorelingState(@PathVariable Long userId) {
-        return ResponseEntity.ok(corelingService.getCorelingState(userId));
+    @GetMapping("/{userAccountId}")
+    public ResponseEntity<CorelingStateDto> getCorelingState(@PathVariable Long userAccountId) {
+        return ResponseEntity.ok(corelingService.getCorelingState(userAccountId));
     }
 
-    @PostMapping("/{userId}/interact")
+    @PostMapping("/{userAccountId}/interact")
     public ResponseEntity<InteractionResponse> initiateInteraction(
-            @PathVariable Long userId,
+            @PathVariable Long userAccountId,
             @RequestBody InteractionRequest request
     ) {
-        String interactionId = corelingService.processInteraction(userId, request.getMessage());
+        String interactionId = corelingService.processInteraction(userAccountId, request.getMessage());
         return ResponseEntity.accepted().body(new InteractionResponse(interactionId));
     }
 }

@@ -16,7 +16,7 @@ public class ActionHistory {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user;
+    private UserAccount userAccount;
 
     @ManyToOne
     @JoinColumn(name = "coreling_id")

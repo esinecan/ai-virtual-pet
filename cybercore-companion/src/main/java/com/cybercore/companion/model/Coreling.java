@@ -23,4 +23,6 @@ public class Coreling {
 
     @OneToMany(mappedBy = "coreling")
     private List<ActionHistory> actionHistory;
+
+    private Long userAccountId;
 }

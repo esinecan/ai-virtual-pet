@@ -4,7 +4,7 @@ import com.cybercore.companion.dto.AuthResponse;
 import com.cybercore.companion.dto.RegisterRequest;
 import com.cybercore.companion.exception.AuthException;
 import com.cybercore.companion.model.Coreling;
-import com.cybercore.companion.model.User;
+import com.cybercore.companion.model.UserAccount;
 import com.cybercore.companion.repository.UserRepository;
 import com.cybercore.companion.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -24,21 +24,21 @@ public class AuthService {
             throw new AuthException("Username already exists");
         }
 
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setCoreling(createNewCoreling()); // Auto-create Coreling
-        userRepository.save(user);
+        UserAccount userAccount = new UserAccount();
+        userAccount.setUsername(request.getUsername());
+        userAccount.setPassword(passwordEncoder.encode(request.getPassword()));
+        userAccount.setCoreling(createNewCoreling()); // Auto-create Coreling
+        userRepository.save(userAccount);
 
-        String token = jwtUtil.generateToken(user.getUsername());
+        String token = jwtUtil.generateToken(userAccount.getUsername());
         return new AuthResponse(token);
     }
 
     public AuthResponse login(String username, String password) {
-        User user = userRepository.findByUsername(username)
+        UserAccount userAccount = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AuthException("Invalid credentials"));
 
-        if (!passwordEncoder.matches(password, user.getPassword())) {
+        if (!passwordEncoder.matches(password, userAccount.getPassword())) {
             throw new AuthException("Invalid credentials");
         }
 

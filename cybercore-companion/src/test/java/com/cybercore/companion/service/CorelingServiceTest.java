@@ -34,7 +34,7 @@ class CorelingServiceTest {
 
     @Test
     void getCorelingState_NotFound() {
-        when(corelingRepository.findByUserId(anyLong())).thenReturn(Optional.empty());
+        when(corelingRepository.findByUserAccountId(anyLong())).thenReturn(Optional.empty());
         
         assertThrows(ResourceNotFoundException.class, () ->
             corelingService.getCorelingState(1L)

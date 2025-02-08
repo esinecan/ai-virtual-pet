@@ -17,7 +17,7 @@ public class Interaction {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user;
+    private UserAccount userAccount;
 
     @ManyToOne
     @JoinColumn(name = "coreling_id")
@@ -35,8 +35,8 @@ public class Interaction {
 
     public Interaction(String interactionId, Long userId, InteractionStatus status) {
         this.interactionId = UUID.fromString(interactionId);
-        this.user = new User();
-        this.user.setId(userId);
+        this.userAccount = new UserAccount();
+        this.userAccount.setId(userId);
         this.status = status;
     }
 }

@@ -22,8 +22,8 @@ public class CorelingService {
     private final InteractionRepository interactionRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
 
-    public CorelingStateDto getCorelingState(Long userId) {
-        Coreling coreling = corelingRepository.findByUserId(userId)
+    public CorelingStateDto getCorelingState(Long userAccountId) {
+        Coreling coreling = corelingRepository.findByUserAccountId(userAccountId)
                 .orElseThrow(() -> new ResourceNotFoundException("Coreling not found"));
 
         return new CorelingStateDto(
@@ -35,17 +35,17 @@ public class CorelingService {
     }
 
     @Transactional
-    public String processInteraction(Long userId, String message) {
+    public String processInteraction(Long userAccountId, String message) {
         String interactionId = UUID.randomUUID().toString();
         
         interactionRepository.save(
-            new Interaction(interactionId, userId, InteractionStatus.PROCESSING)
+            new Interaction(interactionId, userAccountId, InteractionStatus.PROCESSING)
         );
 
         kafkaTemplate.send(
             "coreling.interactions", 
             interactionId, 
-            String.format("%s|%s", userId, message)
+            String.format("%s|%s", userAccountId, message)
         );
 
         return interactionId;
