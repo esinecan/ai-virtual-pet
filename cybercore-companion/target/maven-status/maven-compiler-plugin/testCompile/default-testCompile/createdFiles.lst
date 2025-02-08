@@ -1,0 +1,6 @@
+com\cybercore\companion\security\SecurityIntegrationTest.class
+com\cybercore\companion\service\InteractionServiceTest.class
+com\cybercore\companion\service\AuthServiceTest.class
+com\cybercore\companion\security\JwtUtilTest.class
+CybercoreCompanionApplicationTests.class
+com\cybercore\companion\service\CorelingServiceTest.class
