@@ -26,6 +26,7 @@ ________________
 
 2. System Architecture
 2.1. Architecture Diagram
+```
                    +----------------------+
                    |   Client (SwaggerUI) |
                    +----------+-----------+
@@ -54,6 +55,8 @@ ________________
 |   Prometheus   |
 |   + Grafana    |
 +----------------+
+```
+
 2.2. Component Breakdown
 1. Spring Boot API:
    * REST endpoints for user/Coreling management.
@@ -85,10 +88,9 @@ ________________
    * Spring Boot Actuator exposes metrics → Prometheus scrapes → Grafana visualizes.
 3.2. API Endpoints (Key Examples)
 * User/Coreling Management:
-   * POST /users, GET /coreling/{id}, PUT /coreling/{id}/action.
+   * POST /api/auth/register, POST /api/auth/login, GET /api/coreling/{userAccountId}, POST /api/coreling/{userAccountId}/interact.
 * Async Interaction:
-   * POST /interaction → Returns interactionId for status polling.
-   * GET /interaction/{id}/status → Returns { status: "processing/complete", response: "..." }.
+   * GET /api/interaction/{interactionId}/status → Returns { status: "processing/complete", response: "..." }.
 ________________
 
 
@@ -123,45 +125,10 @@ Phase 2 (Observability & Polish – 1 Week)
    * Add API key authentication via Spring Security.
 Phase 3 (AWS Expansion – Post-Certification)
 * Deploy to EKS: Add Terraform/EKS configuration files.
-* Replace Redis with ElastiCache: If demonstrating AWS skills becomes critical.
+* Replace Redis with ElastiCache.
 ________________
 
-
-6. GitHub Presentation
-6.1. Key Repo Sections
-1. README.md:
-   * “Skills Demonstrated” section mapping features to your CV:
-      * “Kafka Event Processing” → CompuGroup’s Kafka migration.
-      * “Prometheus/Grafana Monitoring” → ElasticSearch integration at CGM.
-   * “AWS Learning Path” section linking to certification goals.
-2. Diagrams:
-   * Architecture diagram highlighting Kafka, Spring Boot, Prometheus.
-3. /docs Folder:
-   * Detailed setup guide for local LLM + pgvector.
-   * Screenshots of Grafana dashboards.
-6.2. DevOps Emphasis
-* CI/CD Pipeline:
-   * GitHub Actions → Build Docker image → Push to ECR → Deploy to Kubernetes.
-* Kubernetes Manifests:
-   * Include kustomize/Helm files (even for local minikube).
-________________
-
-
-7. Why This Design?
-7.1. Aligns with Your CV Strengths
-* Spring Boot + Kafka: Directly mirrors your CompuGroup Medical work.
-* ElasticSearch/Prometheus: Highlights observability expertise.
-* Kubernetes: Reinforces orchestration skills (even if local).
-7.2. Strategic for AWS Certification
-* EKS Exposure: Introduces AWS’s managed Kubernetes without overcomplicating the MVP.
-* Basic Cloud Concepts: S3 (model storage) and IAM (if using EKS IRSA).
-7.3. Employer-Friendly
-* Focus on Depth: Demonstrates mastery of backend/DevOps tools employers value.
-* Clear Extensions: Notes like “Could migrate PostgreSQL to RDS” show forward-thinking.
-
-### **Deeply Detailed Design for the Initial Spring Boot Application**
-We will **break down every aspect** of the **Spring Boot application** before writing any code, ensuring a well-structured and scalable architecture.
-
+### **Design for the Initial Spring Boot Application**
 ---
 
 ## **1. Core Objectives of the Spring Boot Application**
@@ -218,38 +185,37 @@ com.cybercore.companion
  ├── config              // Spring Security, Swagger, Kafka config
  ├── controller          // REST controllers: Auth, Coreling, Interaction
  ├── dto                 // Request and response DTOs
- ├── model               // Entities: User, Coreling, ActionHistory, Interaction
+ ├── model               // Entities: UserAccount, Coreling, ActionHistory, Interaction
  ├── repository          // Spring Data JPA repositories
  ├── service             // Business logic services
  ├── messaging           // Kafka producers & consumers
  ├── util                // Utility classes (e.g., JWT, error handling)
  ├── security            // Security configuration & JWT handling
  ├── observability       // Logging, monitoring, Prometheus integration
- └── CyberCoreApp.java   // Main application entry point
+ └── CybercoreCompanionApplication.java   // Main application entry point
 ```
 
 ---
 
 ## **4. Database Design & Persistence Layer**
 ### **4.1. Database Tables**
-#### **User Table**
+#### **UserAccount Table**
 - Stores authentication credentials.
 - Used for login and securing API access.
 ```sql
-CREATE TABLE users (
+CREATE TABLE user_account (
   id SERIAL PRIMARY KEY,
   username VARCHAR(50) UNIQUE NOT NULL,
-  email VARCHAR(100) UNIQUE NOT NULL,
-  password_hash TEXT NOT NULL,
+  password TEXT NOT NULL,
   created_at TIMESTAMP DEFAULT NOW()
 );
 ```
 #### **Coreling Table**
 - Stores a user’s Coreling state, including its personality and historical actions.
 ```sql
-CREATE TABLE corelings (
+CREATE TABLE coreling (
   id SERIAL PRIMARY KEY,
-  user_id INT REFERENCES users(id) ON DELETE CASCADE,
+  user_account_id INT REFERENCES user_account(id) ON DELETE CASCADE,
   data_integrity INT DEFAULT 100,
   processing_load INT DEFAULT 50,
   emotional_charge INT DEFAULT 50,
@@ -262,8 +228,8 @@ CREATE TABLE corelings (
 ```sql
 CREATE TABLE action_history (
   id SERIAL PRIMARY KEY,
-  user_id INT REFERENCES users(id) ON DELETE CASCADE,
-  coreling_id INT REFERENCES corelings(id) ON DELETE CASCADE,
+  user_account_id INT REFERENCES user_account(id) ON DELETE CASCADE,
+  coreling_id INT REFERENCES coreling(id) ON DELETE CASCADE,
   action_type VARCHAR(50),
   payload TEXT,
   timestamp TIMESTAMP DEFAULT NOW()
@@ -272,10 +238,10 @@ CREATE TABLE action_history (
 #### **Interaction Table**
 - Tracks asynchronous LLM processing.
 ```sql
-CREATE TABLE interactions (
+CREATE TABLE interaction (
   interaction_id UUID PRIMARY KEY,
-  user_id INT REFERENCES users(id) ON DELETE CASCADE,
-  coreling_id INT REFERENCES corelings(id) ON DELETE CASCADE,
+  user_account_id INT REFERENCES user_account(id) ON DELETE CASCADE,
+  coreling_id INT REFERENCES coreling(id) ON DELETE CASCADE,
   status VARCHAR(20) DEFAULT 'processing',
   response TEXT,
   created_at TIMESTAMP DEFAULT NOW(),
@@ -286,27 +252,26 @@ CREATE TABLE interactions (
 ---
 
 ## **5. REST API Design**
-### **5.1. Authentication Endpoints (`/auth`)**
+### **5.1. Authentication Endpoints (`/api/auth`)**
 | Method | Endpoint | Description |
 |--------|---------|-------------|
-| `POST` | `/auth/register` | Register a new user |
-| `POST` | `/auth/login` | Authenticate and return JWT |
+| `POST` | `/api/auth/register` | Register a new user |
+| `POST` | `/api/auth/login` | Authenticate and return JWT |
 
 ---
 
-### **5.2. Coreling Endpoints (`/coreling`)**
+### **5.2. Coreling Endpoints (`/api/coreling`)**
 | Method | Endpoint | Description |
 |--------|---------|-------------|
-| `GET` | `/coreling/{userId}` | Retrieve Coreling state |
-| `PUT` | `/coreling/{userId}/action` | Perform a synchronous action (defrag, bug fix) |
-| `POST` | `/coreling/{userId}/talk` | Initiate an asynchronous AI conversation |
+| `GET` | `/api/coreling/{userAccountId}` | Retrieve Coreling state |
+| `POST` | `/api/coreling/{userAccountId}/interact` | Initiate an asynchronous AI conversation |
 
 ---
 
-### **5.3. Interaction Endpoints (`/interaction`)**
+### **5.3. Interaction Endpoints (`/api/interaction`)**
 | Method | Endpoint | Description |
 |--------|---------|-------------|
-| `GET` | `/interaction/{interactionId}/status` | Check LLM response status |
+| `GET` | `/api/interaction/{interactionId}/status` | Check LLM response status |
 
 ---
 
@@ -314,8 +279,7 @@ CREATE TABLE interactions (
 ### **6.1. Topics**
 | Topic | Description |
 |--------|-------------|
-| `coreling.talk.requests` | Handles talk requests (published by Spring Boot) |
-| `coreling.talk.responses` | Handles AI responses (published by Node.js service) |
+| `coreling.interactions` | Handles interaction requests (published by Spring Boot) |
 
 ---
 
@@ -334,7 +298,7 @@ CREATE TABLE interactions (
 
 ## **8. Security Implementation**
 ### **8.1. JWT Authentication**
-- Users will authenticate via `POST /auth/login`.
+- Users will authenticate via `POST /api/auth/login`.
 - JWT tokens will be required for all secured endpoints.
 
 ### **8.2. Role-Based Access Control**
