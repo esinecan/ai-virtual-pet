@@ -2,8 +2,8 @@ package com.cybercore.companion.ai.service;
 
 import com.cybercore.companion.ai.vector.VectorStore;
 import com.cybercore.companion.ai.vector.VectorMatch;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.ai.ollama.OllamaChatModel;
@@ -14,21 +14,30 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Service
+@EnableKafka
 public class LLMInteractionService {
 
-    @Autowired
-    private OllamaChatModel ollamaChatClient;
+    private final OllamaChatModel ollamaChatClient;
+    private final EmbeddingModel embeddingModel;
+    private final VectorStore vectorStore;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
-    @Autowired
-    private EmbeddingModel embeddingModel;
+    public LLMInteractionService(
+            OllamaChatModel ollamaChatClient,
+            EmbeddingModel embeddingModel,
+            VectorStore vectorStore,
+            KafkaTemplate<String, String> kafkaTemplate) {
+        this.ollamaChatClient = ollamaChatClient;
+        this.embeddingModel = embeddingModel;
+        this.vectorStore = vectorStore;
+        this.kafkaTemplate = kafkaTemplate;
+    }
 
-    @Autowired
-    private VectorStore vectorStore;
-
-    @Autowired
-    private KafkaTemplate<String, String> kafkaTemplate;
-
-    @KafkaListener(topics = "coreling.interactions", groupId = "llm-group")
+    @KafkaListener(
+        topics = "coreling.interactions",
+        groupId = "${spring.kafka.consumer.group-id:llm-group}",
+        containerFactory = "kafkaListenerContainerFactory"
+    )
     public void listenForInteraction(String message) {
         // Parse message (expected format: "userAccountId|userInput")
         String[] parts = message.split("\\|", 2);
