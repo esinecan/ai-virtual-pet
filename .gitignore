@@ -1,47 +1,88 @@
-cybercore-companion/target/classes/com/cybercore/companion/controller/CorelingController.class
-cybercore-companion/target/classes/com/cybercore/companion/model/ActionHistory.class
-cybercore-companion/target/classes/com/cybercore/companion/model/Coreling.class
-cybercore-companion/target/classes/com/cybercore/companion/model/Interaction.class
-cybercore-companion/target/classes/com/cybercore/companion/model/User.class
-cybercore-companion/target/classes/com/cybercore/companion/repository/CorelingRepository.class
-cybercore-companion/target/classes/com/cybercore/companion/repository/UserRepository.class
-cybercore-companion/target/classes/com/cybercore/companion/security/JwtUtil.class
-cybercore-companion/target/classes/com/cybercore/companion/security/UserDetailsServiceImpl.class
-cybercore-companion/target/classes/com/cybercore/companion/service/AuthService.class
-cybercore-companion/target/classes/com/cybercore/companion/service/CorelingService.class
-cybercore-companion/target/classes/com/cybercore/companion/service/InteractionService.class
-cybercore-companion/target/classes/com/cybercore/companion/util/JwtUtil.class
-cybercore-companion/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst
-cybercore-companion/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
-cybercore-companion/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/createdFiles.lst
-cybercore-companion/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst
-cybercore-companion/target/test-classes/CybercoreCompanionApplicationTests.class
-cybercore-companion/target/test-classes/com/cybercore/companion/security/JwtUtilTest.class
-cybercore-companion/target/test-classes/com/cybercore/companion/security/SecurityIntegrationTest.class
-cybercore-companion/target/test-classes/com/cybercore/companion/service/AuthServiceTest.class
-cybercore-companion/target/test-classes/com/cybercore/companion/service/CorelingServiceTest.class
-cybercore-companion/target/test-classes/com/cybercore/companion/service/InteractionServiceTest.class
-cybercore-companion/target/classes/com/cybercore/companion/controller/CorelingController.class
-cybercore-companion/target/classes/com/cybercore/companion/model/ActionHistory.class
-cybercore-companion/target/classes/com/cybercore/companion/model/Coreling.class
-cybercore-companion/target/classes/com/cybercore/companion/model/Interaction.class
-cybercore-companion/target/classes/com/cybercore/companion/model/User.class
-cybercore-companion/target/classes/com/cybercore/companion/repository/CorelingRepository.class
-cybercore-companion/target/classes/com/cybercore/companion/repository/UserRepository.class
-cybercore-companion/target/classes/com/cybercore/companion/security/JwtUtil.class
-cybercore-companion/target/classes/com/cybercore/companion/security/UserDetailsServiceImpl.class
-cybercore-companion/target/classes/com/cybercore/companion/service/AuthService.class
-cybercore-companion/target/classes/com/cybercore/companion/service/CorelingService.class
-cybercore-companion/target/classes/com/cybercore/companion/service/InteractionService.class
-cybercore-companion/target/classes/com/cybercore/companion/util/JwtUtil.class
-cybercore-companion/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst
-cybercore-companion/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
-cybercore-companion/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/createdFiles.lst
-cybercore-companion/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst
-cybercore-companion/target/test-classes/CybercoreCompanionApplicationTests.class
-cybercore-companion/target/test-classes/com/cybercore/companion/security/JwtUtilTest.class
-cybercore-companion/target/test-classes/com/cybercore/companion/security/SecurityIntegrationTest.class
-cybercore-companion/target/test-classes/com/cybercore/companion/service/AuthServiceTest.class
-cybercore-companion/target/test-classes/com/cybercore/companion/service/CorelingServiceTest.class
-cybercore-companion/target/test-classes/com/cybercore/companion/service/InteractionServiceTest.class
-cybercore-companion/target/classes/com/cybercore/companion/controller/CorelingController.class
+# Ignore target directory
+target/
+
+# Ignore IDE settings
+.vscode/
+.idea/
+*.iml
+
+# Ignore compiled class files
+*.class
+
+# Ignore logs
+*.log
+
+# Ignore temporary files
+*.tmp
+*.temp
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore build tools files
+mvnw
+mvnw.cmd
+.gradle/
+build/
+
+# Ignore project as text directories and their contents
+**/project as text/
+
+# Ignore specific Python file
+project_as_text.py
+
+# Ignore specific text file
+spring ai knowledge.txt
+
+# Ignore other common files
+*.swp
+*.swo
+*.bak
+*.orig
+*.rej
+
+# Ignore node_modules if any
+node_modules/
+
+# Ignore package-lock.json if any
+package-lock.json
+
+# Ignore Python virtual environments
+venv/
+.env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore IntelliJ IDEA specific files
+*.ipr
+*.iws
+*.idea/
+
+# Ignore Eclipse specific files
+.project
+.classpath
+.cproject
+.settings/
+
+# Ignore NetBeans specific files
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# Ignore JetBrains Rider specific files
+.idea/
+*.sln
+*.csproj
+*.user
+*.suo
+*.sln.docstates
+*.csproj.user
+*.csproj.DotSettings
+*.csproj.DotSettings.user
+*.csproj.DotSettings.user.*

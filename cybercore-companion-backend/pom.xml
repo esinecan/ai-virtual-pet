@@ -1,0 +1,13 @@
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.cybercore</groupId>
+    <artifactId>cybercore-companion-parent</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+    <modules>
+        <module>cybercore-companion-rest</module>
+        <module>cybercore-companion-llm</module>
+        <module>cybercore-companion-kafka</module>
+    </modules>
+    <!-- repositories, dependencyManagement, and common properties -->
+</project>

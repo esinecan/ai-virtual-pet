@@ -1,0 +1,80 @@
+package com.cybercore.companion.ai.service;
+
+import com.cybercore.companion.ai.vector.VectorStore;
+import com.cybercore.companion.ai.vector.VectorMatch;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.ai.ollama.OllamaChatModel;
+import org.springframework.ai.embedding.EmbeddingModel;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+@Service
+public class LLMInteractionService {
+
+    @Autowired
+    private OllamaChatModel ollamaChatClient;
+
+    @Autowired
+    private EmbeddingModel embeddingModel;
+
+    @Autowired
+    private VectorStore vectorStore;
+
+    @Autowired
+    private KafkaTemplate<String, String> kafkaTemplate;
+
+    @KafkaListener(topics = "coreling.interactions", groupId = "llm-group")
+    public void listenForInteraction(String message) {
+        // Parse message (expected format: "userAccountId|userInput")
+        String[] parts = message.split("\\|", 2);
+        if (parts.length < 2) return;
+
+        Long userAccountId;
+        try {
+            userAccountId = Long.valueOf(parts[0]);
+        } catch (NumberFormatException e) {
+            return; // Invalid format, discard message
+        }
+        String userInput = parts[1];
+
+        // Generate embedding from user input
+        float[] userEmbedding = embeddingModel.embed(userInput);
+        List<Double> userVector = convertToDoubleList(userEmbedding);
+
+        // Save user input embedding in VectorStore
+        vectorStore.saveVector(userVector, userInput);
+
+        // Fetch relevant stored embeddings for context
+        List<VectorMatch> similarVectors = vectorStore.findSimilarVectors(userVector, 5);
+
+        // Build prompt with RAG
+        String prompt = "User input: " + userInput + "\n" +
+                "Context: " + (similarVectors.isEmpty() ? "None" : similarVectors.stream()
+                        .map(VectorMatch::getContent)
+                        .collect(Collectors.joining("\n")));
+
+        // Get response from Ollama Chat Model
+        String response = ollamaChatClient.call(prompt);
+
+        // Generate embedding for LLM response
+        float[] responseEmbedding = embeddingModel.embed(response);
+        List<Double> responseVector = convertToDoubleList(responseEmbedding);
+
+        // Save LLM response embedding in VectorStore
+        vectorStore.saveVector(responseVector, response);
+
+        // Publish response to Kafka
+        kafkaTemplate.send("coreling.responses", userAccountId.toString(), response);
+    }
+
+    private List<Double> convertToDoubleList(float[] embedding) {
+        return IntStream.range(0, embedding.length)
+                .mapToObj(i -> (double) embedding[i])
+                .collect(Collectors.toList());
+    }
+}
