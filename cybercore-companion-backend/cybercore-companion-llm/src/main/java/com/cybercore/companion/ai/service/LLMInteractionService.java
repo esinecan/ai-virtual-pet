@@ -2,6 +2,7 @@ package com.cybercore.companion.ai.service;
 
 import com.cybercore.companion.ai.vector.VectorStore;
 import com.cybercore.companion.ai.vector.VectorMatch;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+@Slf4j
 @Service
 @EnableKafka
 public class LLMInteractionService {
@@ -41,44 +43,59 @@ public class LLMInteractionService {
     public void listenForInteraction(String message) {
         // Parse message (expected format: "userAccountId|userInput")
         String[] parts = message.split("\\|", 2);
-        if (parts.length < 2) return;
+        if (parts.length < 2) {
+            log.warn("Invalid message format received: {}", message);
+            return;
+        }
 
         Long userAccountId;
         try {
             userAccountId = Long.valueOf(parts[0]);
         } catch (NumberFormatException e) {
-            return; // Invalid format, discard message
+            log.error("Invalid user account ID: {}", parts[0]);
+            return;
         }
         String userInput = parts[1];
 
-        // Generate embedding from user input
-        float[] userEmbedding = embeddingModel.embed(userInput);
-        List<Double> userVector = convertToDoubleList(userEmbedding);
+        try {
+            // Generate embedding from user input
+            float[] userEmbedding = embeddingModel.embed(userInput);
+            List<Double> userVector = convertToDoubleList(userEmbedding);
 
-        // Save user input embedding in VectorStore
-        vectorStore.saveVector(userVector, userInput);
+            // Save user input embedding in VectorStore
+            vectorStore.saveVector(userVector, userInput);
 
-        // Fetch relevant stored embeddings for context
-        List<VectorMatch> similarVectors = vectorStore.findSimilarVectors(userVector, 5);
+            // Fetch relevant stored embeddings for context
+            List<VectorMatch> similarVectors = vectorStore.findSimilarVectors(userVector, 5);
 
-        // Build prompt with RAG
-        String prompt = "User input: " + userInput + "\n" +
-                "Context: " + (similarVectors.isEmpty() ? "None" : similarVectors.stream()
-                        .map(VectorMatch::getContent)
-                        .collect(Collectors.joining("\n")));
+            // Build prompt with RAG
+            String prompt = "User input: " + userInput + "\n" +
+                    "Context: " + (similarVectors.isEmpty() ? "None" : similarVectors.stream()
+                            .map(VectorMatch::getContent)
+                            .collect(Collectors.joining("\n")));
 
-        // Get response from Ollama Chat Model
-        String response = ollamaChatClient.call(prompt);
+            // Get response from Ollama Chat Model
+            String response = ollamaChatClient.call(prompt);
 
-        // Generate embedding for LLM response
-        float[] responseEmbedding = embeddingModel.embed(response);
-        List<Double> responseVector = convertToDoubleList(responseEmbedding);
+            // Generate embedding for LLM response
+            float[] responseEmbedding = embeddingModel.embed(response);
+            List<Double> responseVector = convertToDoubleList(responseEmbedding);
 
-        // Save LLM response embedding in VectorStore
-        vectorStore.saveVector(responseVector, response);
+            // Save LLM response embedding in VectorStore
+            vectorStore.saveVector(responseVector, response);
 
-        // Publish response to Kafka
-        kafkaTemplate.send("coreling.responses", userAccountId.toString(), response);
+            // Send response using key-value pattern
+            kafkaTemplate.send("coreling.responses", userAccountId.toString(), response)
+                .whenComplete((result, ex) -> {
+                    if (ex != null) {
+                        log.error("Failed to send response for user {}", userAccountId, ex);
+                    } else {
+                        log.debug("Response sent for user {}: {}", userAccountId, response);
+                    }
+                });
+        } catch (Exception e) {
+            log.error("Error processing interaction for user {}", userAccountId, e);
+        }
     }
 
     private List<Double> convertToDoubleList(float[] embedding) {

@@ -1,9 +1,30 @@
-# PowerShell script for setting up Kafka, Zookeeper, and PostgreSQL with pgvector on Windows 11
+# PowerShell script for setting up Kafka, Zookeeper, PostgreSQL with pgvector, and Ollama on Windows 11
 # Run this script using: `powershell -ExecutionPolicy Bypass -File .\setup-win.ps1`
 
 $ErrorActionPreference = "Stop"
 
 Write-Host "Starting CyberCore environment setup..."
+
+# Check if Ollama is installed
+$ollamaPath = "$env:LOCALAPPDATA\ollama\ollama.exe"
+if (-not (Test-Path $ollamaPath)) {
+    Write-Host "Installing Ollama..."
+    # Download Ollama installer
+    $installerUrl = "https://ollama.ai/download/OllamaSetup.exe"
+    $installerPath = "$env:TEMP\OllamaSetup.exe"
+    Invoke-WebRequest -Uri $installerUrl -OutFile $installerPath
+
+    # Run installer
+    Start-Process -Wait -FilePath $installerPath -ArgumentList "/S" # Silent install
+    
+    # Wait for Ollama service to be available
+    Write-Host "Waiting for Ollama service to start..."
+    Start-Sleep -Seconds 10
+}
+
+# Pull the Mistral model
+Write-Host "Pulling Mistral model for Ollama..."
+Start-Process -NoNewWindow -Wait -FilePath $ollamaPath -ArgumentList "pull mistral"
 
 # Ensure Docker is installed
 if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {

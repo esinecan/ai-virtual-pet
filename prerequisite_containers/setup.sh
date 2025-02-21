@@ -5,6 +5,26 @@ set -o pipefail  # Prevent errors in a pipeline from being masked
 
 echo "Starting CyberCore environment setup..."
 
+# Install Ollama if not present
+if ! command -v ollama &> /dev/null; then
+    echo "Installing Ollama..."
+    curl https://ollama.ai/install.sh | sh
+    
+    # Wait for Ollama service to start
+    sleep 5
+    
+    # Start Ollama service if not running
+    if ! pgrep -x "ollama" > /dev/null; then
+        echo "Starting Ollama service..."
+        ollama serve &
+        sleep 5
+    fi
+fi
+
+# Pull Mistral model
+echo "Pulling Mistral model for Ollama..."
+ollama pull mistral
+
 # Ensure Docker is installed
 if ! command -v docker &> /dev/null; then
     echo "Docker is not installed. Please install it and retry."

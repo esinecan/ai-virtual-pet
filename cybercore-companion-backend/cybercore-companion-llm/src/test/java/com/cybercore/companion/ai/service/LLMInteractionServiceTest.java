@@ -47,7 +47,9 @@ class LLMInteractionServiceTest {
     @Test
     void listenForInteraction_ShouldProcessValidMessage() {
         // Arrange
-        String message = "123|Hello AI";
+        String userId = "123";
+        String userInput = "Hello AI";
+        String message = userId + "|" + userInput;
         float[] mockEmbedding = {0.1f, 0.2f, 0.3f};
         List<VectorMatch> mockMatches = Collections.singletonList(
             createVectorMatch(1L, 0.95, "Previous: Hello there")
@@ -70,8 +72,12 @@ class LLMInteractionServiceTest {
         assertEquals(0.1, capturedVector.get(0), 0.001, "First vector component should match");
         
         verify(vectorStore).findSimilarVectors(any(), eq(5));
-        verify(ollamaChatClient).call(contains("Hello AI"));
-        verify(kafkaTemplate).send(eq("coreling.responses"), eq("123"), eq(mockResponse));
+        verify(ollamaChatClient).call(contains(userInput));
+        verify(kafkaTemplate).send(
+            eq("coreling.responses"), 
+            eq(userId),  // Using userId as key
+            eq(mockResponse)  // Response as value
+        );
     }
 
     @Test
