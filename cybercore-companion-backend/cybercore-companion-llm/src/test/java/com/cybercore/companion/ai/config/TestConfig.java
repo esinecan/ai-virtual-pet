@@ -18,12 +18,6 @@ import java.util.Map;
 @TestConfiguration
 public class TestConfig {
 
-    @MockBean
-    public EmbeddingModel embeddingModel;
-
-    @MockBean
-    public OllamaChatModel ollamaChatModel;
-
     @Bean
     @Primary
     public ProducerFactory<String, String> producerFactory() {

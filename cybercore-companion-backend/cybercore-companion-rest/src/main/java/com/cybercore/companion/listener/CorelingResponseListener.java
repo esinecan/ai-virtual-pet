@@ -22,11 +22,10 @@ public class CorelingResponseListener {
         try {
             Long accountId = Long.valueOf(userAccountId);
             log.debug("Received response for user {}: {}", accountId, responseMessage);
-            // Here you could:
+            //TODO: corelingService.handleLLMResponse(accountId, responseMessage);
             // 1. Update interaction status in database
             // 2. Send response via WebSocket to connected clients
             // 3. Store the response in interaction history
-            corelingService.handleLLMResponse(accountId, responseMessage);
         } catch (NumberFormatException ex) {
             log.error("Invalid user account ID received: {}", userAccountId, ex);
         } catch (Exception ex) {

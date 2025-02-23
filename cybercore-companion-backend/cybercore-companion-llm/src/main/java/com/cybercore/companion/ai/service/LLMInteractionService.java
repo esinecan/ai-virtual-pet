@@ -85,14 +85,18 @@ public class LLMInteractionService {
             vectorStore.saveVector(responseVector, response);
 
             // Send response using key-value pattern
-            kafkaTemplate.send("coreling.responses", userAccountId.toString(), response)
-                .whenComplete((result, ex) -> {
+            var sendFuture = kafkaTemplate.send("coreling.responses", userAccountId.toString(), response);
+            if (sendFuture != null) {
+                sendFuture.whenComplete((result, ex) -> {
                     if (ex != null) {
                         log.error("Failed to send response for user {}", userAccountId, ex);
                     } else {
                         log.debug("Response sent for user {}: {}", userAccountId, response);
                     }
                 });
+            } else {
+                log.warn("KafkaTemplate.send returned null for sending response for user {}", userAccountId);
+            }
         } catch (Exception e) {
             log.error("Error processing interaction for user {}", userAccountId, e);
         }
