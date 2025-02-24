@@ -3,7 +3,7 @@ How to Use on Windows 11
 - Go near the script
 - Allow script execution (if needed)
     Set-ExecutionPolicy Bypass -Scope Process -Force
-    .\setup.ps1
+    .\setup-win.ps1
 
 How to Use on Linux
 - Make the script executable first:

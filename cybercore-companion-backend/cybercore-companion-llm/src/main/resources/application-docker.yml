@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/cybercore_db
+    username: postgres
+    password: postgres
+  kafka:
+    bootstrap-servers: kafka:9092
+  ai:
+    ollama:
+      base-url: http://ollama:11434
+      model: mistral
+  profiles:
+    active: docker
+
+server:
+  port: 8080
