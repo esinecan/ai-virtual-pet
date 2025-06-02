@@ -1,4 +1,4 @@
-# CyberCore Companion MVP Design Document
+# CyberCore Companion MVP Design Document (IN PROGRESS)
 Project Name: CyberCore Companion
 Type: AI-Driven Pet Simulator (MVP)
 Purpose: Demonstrate backend architecture, async AI integration, and DevOps/observability skills with tools like Spring Boot, Kafka, Prometheus, and Kubernetes.
